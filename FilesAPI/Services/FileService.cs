@@ -38,7 +38,7 @@ public class FileService: IFileService
         }
         catch (Exception ex)
         {
-            _logger.LogError($"An error occured while processing the file");
+            _logger.LogError(ex, $"An error occured while processing the file");
             return Array.Empty<byte>();
         }
     }
