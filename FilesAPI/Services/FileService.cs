@@ -10,10 +10,6 @@ public class FileService: IFileService
     {
         _logger = logger;
     }
-    public async Task<byte[]> GetFileBytes(string fileName)
-    {
-        throw new NotImplementedException();
-    }
 
     public async Task<byte[]> MutateFile(IFormFile file)
     {

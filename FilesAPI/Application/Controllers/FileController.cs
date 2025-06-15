@@ -1,36 +1,35 @@
+using FilesAPI.Application.File.Handlers;
+using FilesAPI.Domain.File.Commands;
 using FilesAPI.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FilesAPI.Controllers;
 
-[ApiController] // enables web api behaviour
+[ApiController]
 [Route("api/[controller]")]
-public class FileController : ControllerBase // controllerBase for
+public class FileController : ControllerBase
 {
-    private readonly IFileService _fileService;
+    private readonly MutateFileCommandHandler _handler;
     private readonly ILogger<FileController> _logger;
 
-    public FileController(IFileService fileService, ILogger<FileController> logger)
+    public FileController(MutateFileCommandHandler handler, ILogger<FileController> logger)
     {
-        _fileService = fileService;
+        _handler = handler;
         _logger = logger;
     }
 
-    [HttpPost(Name = "UploadFile")]
-    public async Task<IActionResult> UploadFile(IFormFile file)
+    [HttpPost("mutate", Name = "UploadAndMutateFile")]
+    public async Task<IActionResult> UploadAndMutateFile(IFormFile file)
     {
-        // validation
         if (file == null)
-            return BadRequest();
+            return BadRequest("File is required.");
 
-        try
-        {
-            var fileBytes = await _fileService.MutateFile(file);
-            return File(fileBytes, "application/octet-stream", $"mutated-{file.FileName}");
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500);
-        }
+        var command = new MutateFileCommand(file);
+        var result = await _handler.Handle(command);
+
+        if (result.Length == 0)
+            return StatusCode(500, "Could not process file.");
+
+        return File(result, "application/octet-stream", $"mutated-{file.FileName}");
     }
 }
