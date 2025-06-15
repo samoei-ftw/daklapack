@@ -10,19 +10,32 @@ public class FileService: IFileService
     {
         _logger = logger;
     }
-
+/// <summary>
+/// Mutates an uploaded file by copying the file's contents
+/// line-by-line to a temporary file, adding a new line at the end
+/// and then returning the final file as a byte array
+/// </summary>
+/// <param name="file"></param>
+/// <returns></returns>
+/// <exception cref="ArgumentNullException"></exception>
     public async Task<byte[]> MutateFile(IFormFile file)
     {
         try
         {
+            // Validation
             if (file == null)
                 throw new ArgumentNullException(nameof(file));
-
+            // Get temporary file path on disk
             var filePath = Path.GetTempFileName();
+            
+            // Open streams for reading and writing
             using (var stream = new FileStream(filePath, FileMode.Create))
+            // FileMode.Create: if file exists, overwrite, else create    
             using (var writer = new StreamWriter(stream))
+            // Open separate stream for reading (SOC)    
             using (var reader = new StreamReader(file.OpenReadStream()))
             {
+                // Copy file's contents, line by line
                 while (!reader.EndOfStream)
                 {
                     var line = await reader.ReadLineAsync();
@@ -33,7 +46,7 @@ public class FileService: IFileService
             }
 
             _logger.LogInformation("File processed");
-
+            
             return await File.ReadAllBytesAsync(filePath);
         }
         catch (Exception ex)
