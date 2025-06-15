@@ -1,7 +1,5 @@
-using System.Diagnostics;
 using FilesAPI.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using FilesAPI.Models;
 
 namespace FilesAPI.Controllers;
 
